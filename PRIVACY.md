@@ -1,0 +1,2 @@
+# Privacy
+Diagram code is rendered in the page by Mermaid and is not sent to a Neatdraw application server. Source and theme may be stored in this browser's localStorage, best-effort. Clipboard/download actions occur when invoked by the user. This page loads Google Fonts; that service receives standard connection data. No analytics or ad scripts are included. Hosting infrastructure may retain standard server logs.
