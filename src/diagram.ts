@@ -55,7 +55,7 @@ function cleanSvg(raw:string){
    const n=a.name.toLowerCase(),v=a.value.trim()
    if(n.startsWith('on'))el.removeAttribute(a.name)
    if((n==='href'||n.endsWith(':href'))&&v&&!v.startsWith('#')&&!v.startsWith('data:image/'))el.removeAttribute(a.name)
-   if((n==='style'||n==='fill'||n==='stroke')&&/url\\s*\\(\\s*['"]?\\s*(https?:|\\/\\/|javascript:)/i.test(v))el.removeAttribute(a.name)
+   if ((n === 'style' || n === 'fill' || n === 'stroke') && v.toLowerCase().includes('url(') && (v.toLowerCase().includes('http:') || v.toLowerCase().includes('https:') || v.toLowerCase().includes('javascript:'))) el.removeAttribute(a.name)
   }
  }
  root.setAttribute('xmlns','http://www.w3.org/2000/svg')
