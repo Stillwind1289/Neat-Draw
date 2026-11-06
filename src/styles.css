@@ -1176,3 +1176,260 @@ em {
     gap: 9px;
   }
 }
+/* ========================================
+   Neatdraw Studio controls
+   ======================================== */
+
+.studio-controls {
+  padding: 20px;
+  border-top: 1px solid #eaebe5;
+  background: #fff;
+}
+
+.studio-controls-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.studio-controls-heading b {
+  color: #354638;
+  font: 700 12px Manrope, sans-serif;
+}
+
+.studio-controls-heading small {
+  color: #92988d;
+  font-size: 10px;
+}
+
+.studio-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px;
+  color: #596656;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.studio-toggle input,
+.transparent-option input {
+  accent-color: #315c48;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+
+.custom-style-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.color-control {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #7b8477;
+  font-size: 10px;
+}
+
+.color-control input[type="color"] {
+  width: 100%;
+  height: 37px;
+  padding: 3px;
+  border: 1px solid #e5e8df;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.typography-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.typography-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #7b8477;
+  font-size: 10px;
+}
+
+.typography-controls select,
+.palette-save-input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #e4e7df;
+  border-radius: 6px;
+  outline: none;
+  background: #fbfcf9;
+  color: #465347;
+  font: 11px 'DM Sans', sans-serif;
+}
+
+.typography-controls select:focus,
+.palette-save-input:focus {
+  border-color: #91a88b;
+}
+
+.reset-style {
+  border: 0;
+  background: transparent;
+  padding: 5px 0;
+  color: #788675;
+  font-size: 10px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.palette-saver {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.palette-save-input {
+  flex: 1;
+}
+
+.palette-saver button,
+.saved-palette button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #e2e6dd;
+  border-radius: 6px;
+  padding: 9px 11px;
+  background: #fff;
+  color: #596b57;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.palette-saver button:hover,
+.saved-palette button:hover {
+  border-color: #a9bba2;
+  background: #f8faf6;
+}
+
+.palette-saver button svg,
+.saved-palette button svg {
+  width: 13px;
+  height: 13px;
+}
+
+.saved-palette-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.saved-palette {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #eceee8;
+  border-radius: 6px;
+  background: #fbfcf9;
+}
+
+.palette-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #596656;
+  font-size: 10px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-palette button {
+  padding: 6px 8px;
+  flex-shrink: 0;
+}
+
+.saved-palette button:last-child {
+  color: #a16e61;
+}
+
+.export-settings {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 13px;
+  margin-top: 17px;
+  padding-top: 15px;
+  border-top: 1px solid #eff0eb;
+}
+
+.export-settings label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #778174;
+  font-size: 10px;
+}
+
+.export-settings select {
+  padding: 7px 9px;
+  border: 1px solid #e4e7df;
+  border-radius: 5px;
+  background: white;
+  color: #536250;
+  font: 10px 'DM Sans', sans-serif;
+}
+
+.transparent-option {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #778174;
+  font-size: 10px;
+}
+
+@media (max-width: 520px) {
+  .studio-controls {
+    padding: 15px 12px;
+  }
+
+  .custom-style-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .typography-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .palette-saver {
+    flex-wrap: wrap;
+  }
+
+  .palette-save-input {
+    flex-basis: 100%;
+  }
+
+  .saved-palette {
+    flex-wrap: wrap;
+  }
+
+  .export-settings {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
