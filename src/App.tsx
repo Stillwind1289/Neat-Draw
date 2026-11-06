@@ -283,9 +283,9 @@ function App() {
   }
 
   return (
-    <div className="shell">
+    <div className="shell" id="top">
       <header>
-        <a className="brand" href="#">
+        <a className="brand" href="#top">
           <span className="mark"><Layers3 size={18} /></span>
           neatdraw<span className="period">.</span>
         </a>
@@ -293,7 +293,6 @@ function App() {
         <nav>
           <a href="#how">How it works</a>
           <a href="#themes">Themes</a>
-          <a href="#privacy">Privacy</a>
         </nav>
 
         <a className="navbutton" href="#studio">
@@ -374,6 +373,36 @@ function App() {
             </div>
 
             <div className="handnote">made to make sense ↗</div>
+          </div>
+        </section>
+
+        <section className="milestone" aria-label="Neatdraw export milestone">
+          <div className="milestone-top">
+            <span>✳ A LITTLE NEATDRAW MILESTONE</span>
+            <span className="milestone-label">
+              <i /> SHARED TOTAL
+            </span>
+          </div>
+
+          <div className="milestone-main">
+            <strong>
+              {totalExports === null
+                ? '—'
+                : totalExports.toLocaleString()}
+            </strong>
+
+            <div>
+              <b>Export actions recorded.</b>
+              <p>
+                One shared count across Neatdraw. We count export actions,
+                not people or diagrams.
+              </p>
+            </div>
+          </div>
+
+          <div className="milestone-note">
+            <Check size={14} />
+            Diagram contents are not sent with the count.
           </div>
         </section>
 
@@ -569,13 +598,6 @@ function App() {
                 <LockKeyhole /> Rendering happens locally in your browser.
               </span>
 
-              <span>
-                <Download />{' '}
-                {totalExports === null
-                  ? 'Loading export count…'
-                  : `${totalExports.toLocaleString()} diagrams exported`}
-              </span>
-
               <span>Mermaid syntax · No sign-in needed</span>
             </div>
           </div>
@@ -653,36 +675,6 @@ function App() {
           </div>
         </section>
 
-        <section className="privacy" id="privacy">
-          <div className="privacyart">
-            <div className="orbit" />
-            <div className="lock"><LockKeyhole /></div>
-            <span>✳</span>
-          </div>
-
-          <div>
-            <div className="eyebrow">YOUR WORK IS YOURS</div>
-            <h2>
-              Private looks<br />
-              good on <em>you.</em>
-            </h2>
-
-            <p>
-              Your Mermaid code is rendered in your browser. Neatdraw
-              doesn't send your diagrams to a server, ask you to create
-              an account, or keep a copy of your work. We do count
-              successful SVG and PNG export actions in a shared total;
-              diagram contents are never sent to that counter.
-            </p>
-
-            <ul>
-              <li><Check /> No account or sign-in</li>
-              <li><Check /> No diagram uploads</li>
-              <li><Check /> Only a shared export total is counted</li>
-            </ul>
-          </div>
-        </section>
-
         <section className="closing">
           <div className="eyebrow">THAT'S THE WHOLE IDEA</div>
           <h2>Go make something <em>neat.</em></h2>
@@ -696,14 +688,37 @@ function App() {
         </section>
       </main>
 
-      <footer>
-        <a className="brand" href="#">
-          <span className="mark"><Layers3 /></span>
-          neatdraw<span className="period">.</span>
-        </a>
+      <footer className="site-footer">
+        <div className="footer-main">
+          <div className="footer-brand">
+            <a className="brand" href="#top">
+              <span className="mark"><Layers3 /></span>
+              neatdraw<span className="period">.</span>
+            </a>
 
-        <span>A little polish for Mermaid diagrams.</span>
-        <span>Made for clearer thinking <Heart /></span>
+            <p>A little polish for Mermaid diagrams.</p>
+            <small>Made for clearer thinking <Heart /></small>
+          </div>
+
+          <div className="footer-links">
+            <div>
+              <b>Make</b>
+              <a href="#studio">Workshop</a>
+              <a href="#themes">Themes</a>
+            </div>
+
+            <div>
+              <b>Discover</b>
+              <a href="#how">How it works</a>
+              <a href="#top">Back to top ↑</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} Neatdraw</span>
+          <span>Mermaid diagrams, made a little neater.</span>
+        </div>
       </footer>
 
       {toast && (
