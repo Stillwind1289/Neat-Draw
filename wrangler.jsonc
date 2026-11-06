@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "neat-draw",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-11-06",
+  "assets": {
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "neatdraw-stats",
+      "database_id": "a6c305a2-6ba4-4472-b9e3-49171f3d1b6d"
+    }
+  ]
+}
+
