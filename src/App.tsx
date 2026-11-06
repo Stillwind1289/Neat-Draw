@@ -12,7 +12,12 @@ import {
   LockKeyhole,
   RotateCcw,
   Sparkles,
-  WandSparkles
+  WandSparkles,
+  Palette,
+  Trash2,
+  Save,
+  Pencil,
+  X
 } from 'lucide-react'
 import {
   examples,
@@ -20,8 +25,31 @@ import {
   starter,
   themes,
   validate,
-  type ThemeId
+  defaultCustomStyle,
+  fontOptions,
+  type ThemeId,
+  type CustomStyle
 } from './diagram'
+
+interface SavedPalette {
+  id: string
+  name: string
+  style: CustomStyle
+}
+
+function styleFromTheme(theme: ThemeId): CustomStyle {
+  const v = themes[theme].variables
+
+  return {
+    background: v.background,
+    primaryColor: v.primaryColor,
+    primaryTextColor: v.primaryTextColor,
+    primaryBorderColor: v.primaryBorderColor,
+    lineColor: v.lineColor,
+    fontFamily: v.fontFamily,
+    fontSize: v.fontSize
+  }
+}
 
 function App() {
   const [code, setCode] = useState(() => {
@@ -41,6 +69,34 @@ function App() {
     }
   })
 
+  const [customEnabled, setCustomEnabled] = useState(false)
+
+  const [customStyle, setCustomStyle] = useState<CustomStyle>(() => {
+    try {
+      const saved = localStorage.getItem('nd-custom-style')
+      return saved
+        ? { ...defaultCustomStyle, ...JSON.parse(saved) }
+        : defaultCustomStyle
+    } catch {
+      return defaultCustomStyle
+    }
+  })
+
+  const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>(() => {
+    try {
+      const saved = localStorage.getItem('nd-palettes')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  const [paletteName, setPaletteName] = useState('')
+  const [renameId, setRenameId] = useState('')
+  const [renameValue, setRenameValue] = useState('')
+  const [pngScale, setPngScale] = useState(2)
+  const [transparentPng, setTransparentPng] = useState(false)
+
   const [svg, setSvg] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -56,6 +112,17 @@ function App() {
     setToast(s)
     window.setTimeout(() => setToast(''), 2400)
   }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('nd-code', code)
+      localStorage.setItem('nd-theme', theme)
+      localStorage.setItem('nd-custom-style', JSON.stringify(customStyle))
+      localStorage.setItem('nd-palettes', JSON.stringify(savedPalettes))
+    } catch {
+      // Local saving may be unavailable in some browsers.
+    }
+  }, [code, theme, customStyle, savedPalettes])
 
   useEffect(() => {
     let cancelled = false
@@ -80,7 +147,7 @@ function App() {
           setTotalExports(data.totalExports)
         }
       } catch {
-        // Statistics are optional; the editor remains usable.
+        // Statistics are optional.
       }
     }
 
@@ -124,7 +191,11 @@ function App() {
     }
   }
 
-  const render = useCallback(async (src: string, t: ThemeId) => {
+  const render = useCallback(async (
+    src: string,
+    t: ThemeId,
+    style: CustomStyle | undefined
+  ) => {
     const id = ++sequence.current
     const issue = validate(src)
 
@@ -137,7 +208,7 @@ function App() {
     setBusy(true)
 
     try {
-      const result = await renderDiagram(src, t)
+      const result = await renderDiagram(src, t, style)
 
       if (id === sequence.current) {
         setSvg(result)
@@ -160,20 +231,17 @@ function App() {
   }, [])
 
   useEffect(() => {
-    try {
-      localStorage.setItem('nd-code', code)
-      localStorage.setItem('nd-theme', theme)
-    } catch {
-      // Local saving may be unavailable in some browsers.
-    }
-
     const timer = window.setTimeout(
-      () => void render(code, theme),
+      () => void render(
+        code,
+        theme,
+        customEnabled ? customStyle : undefined
+      ),
       240
     )
 
     return () => window.clearTimeout(timer)
-  }, [code, theme, render])
+  }, [code, theme, customEnabled, customStyle, render])
 
   useEffect(() => {
     if (preview.current) {
@@ -223,8 +291,10 @@ function App() {
   const png = async () => {
     if (!svg) return
 
+    let url = ''
+
     try {
-      const url = URL.createObjectURL(
+      url = URL.createObjectURL(
         new Blob([svg], { type: 'image/svg+xml' })
       )
 
@@ -240,24 +310,27 @@ function App() {
 
       const w = vb?.[2] || im.naturalWidth || 1000
       const h = vb?.[3] || im.naturalHeight || 700
-      const s = Math.min(3, 2400 / Math.max(w, h))
+      const scale = pngScale
 
       const c = document.createElement('canvas')
-      c.width = w * s
-      c.height = h * s
+      c.width = Math.round(w * scale)
+      c.height = Math.round(h * scale)
 
       const ctx = c.getContext('2d')
 
       if (!ctx) {
-        URL.revokeObjectURL(url)
         throw Error('Canvas unavailable')
       }
 
-      ctx.fillStyle = themes[theme].bg
-      ctx.fillRect(0, 0, c.width, c.height)
-      ctx.drawImage(im, 0, 0, c.width, c.height)
+      if (!transparentPng) {
+        ctx.fillStyle = customEnabled
+          ? customStyle.background
+          : themes[theme].bg
 
-      URL.revokeObjectURL(url)
+        ctx.fillRect(0, 0, c.width, c.height)
+      }
+
+      ctx.drawImage(im, 0, 0, c.width, c.height)
 
       const blob = await new Promise<Blob>((resolve, reject) => {
         c.toBlob(
@@ -269,7 +342,7 @@ function App() {
       })
 
       save(blob, 'neatdraw.png')
-      notify('PNG export ready')
+      notify(`PNG export ready · ${scale}×`)
       void recordExport('png')
     } catch (e) {
       notify(
@@ -277,7 +350,81 @@ function App() {
           ? e.message
           : 'PNG export failed'
       )
+    } finally {
+      if (url) URL.revokeObjectURL(url)
     }
+  }
+
+  const updateStyle = (key: keyof CustomStyle, value: string) => {
+    setCustomStyle(current => ({
+      ...current,
+      [key]: value
+    }))
+  }
+
+  const chooseTheme = (id: ThemeId) => {
+    setTheme(id)
+    setCustomStyle(styleFromTheme(id))
+    setCustomEnabled(false)
+  }
+
+  const savePalette = () => {
+    const name = paletteName.trim()
+
+    if (!name) {
+      notify('Give your palette a name first')
+      return
+    }
+
+    if (savedPalettes.length >= 5) {
+      notify('You can save up to five palettes')
+      return
+    }
+
+    const palette: SavedPalette = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: name.slice(0, 30),
+      style: { ...customStyle }
+    }
+
+    setSavedPalettes(current => [...current, palette])
+    setPaletteName('')
+    notify('Palette saved')
+  }
+
+  const applyPalette = (palette: SavedPalette) => {
+    setCustomStyle(palette.style)
+    setCustomEnabled(true)
+    notify(`Applied ${palette.name}`)
+  }
+
+  const deletePalette = (id: string) => {
+    setSavedPalettes(current => current.filter(p => p.id !== id))
+    notify('Palette deleted')
+  }
+
+  const startRename = (palette: SavedPalette) => {
+    setRenameId(palette.id)
+    setRenameValue(palette.name)
+  }
+
+  const finishRename = () => {
+    const name = renameValue.trim()
+
+    if (!name) {
+      notify('Enter a palette name')
+      return
+    }
+
+    setSavedPalettes(current => current.map(p =>
+      p.id === renameId
+        ? { ...p, name: name.slice(0, 30) }
+        : p
+    ))
+
+    setRenameId('')
+    setRenameValue('')
+    notify('Palette renamed')
   }
 
   return (
@@ -440,7 +587,7 @@ function App() {
                 <button
                   onClick={() => {
                     setCode(starter)
-                    setTheme('paper')
+                    chooseTheme('paper')
                     setExample('Flowchart')
                     notify('Starter restored')
                   }}
@@ -547,8 +694,8 @@ function App() {
                         key={id}
                         aria-label={themes[id].name}
                         title={themes[id].name}
-                        className={theme === id ? 'chosen' : ''}
-                        onClick={() => setTheme(id)}
+                        className={theme === id && !customEnabled ? 'chosen' : ''}
+                        onClick={() => chooseTheme(id)}
                       >
                         <i style={{ background: themes[id].bg }} />
                         <i style={{
@@ -585,6 +732,222 @@ function App() {
               </div>
             </div>
 
+            <section className="studio-controls">
+              <div className="studio-controls-heading">
+                <div>
+                  <div className="eyebrow">MAKE IT YOURS</div>
+                  <h3><Palette /> Custom styling</h3>
+                  <p>Adjust the colours and typography of your diagram.</p>
+                </div>
+
+                <label className="studio-toggle">
+                  <input
+                    type="checkbox"
+                    checked={customEnabled}
+                    onChange={e => setCustomEnabled(e.target.checked)}
+                  />
+                  <span>Enable custom style</span>
+                </label>
+              </div>
+
+              <div className={`custom-style-grid ${customEnabled ? '' : 'disabled'}`}>
+                <label className="color-control">
+                  <span>Background</span>
+                  <input
+                    type="color"
+                    value={customStyle.background}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('background', e.target.value)}
+                  />
+                  <small>{customStyle.background}</small>
+                </label>
+
+                <label className="color-control">
+                  <span>Node fill</span>
+                  <input
+                    type="color"
+                    value={customStyle.primaryColor}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('primaryColor', e.target.value)}
+                  />
+                  <small>{customStyle.primaryColor}</small>
+                </label>
+
+                <label className="color-control">
+                  <span>Text</span>
+                  <input
+                    type="color"
+                    value={customStyle.primaryTextColor}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('primaryTextColor', e.target.value)}
+                  />
+                  <small>{customStyle.primaryTextColor}</small>
+                </label>
+
+                <label className="color-control">
+                  <span>Node border</span>
+                  <input
+                    type="color"
+                    value={customStyle.primaryBorderColor}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('primaryBorderColor', e.target.value)}
+                  />
+                  <small>{customStyle.primaryBorderColor}</small>
+                </label>
+
+                <label className="color-control">
+                  <span>Connectors</span>
+                  <input
+                    type="color"
+                    value={customStyle.lineColor}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('lineColor', e.target.value)}
+                  />
+                  <small>{customStyle.lineColor}</small>
+                </label>
+              </div>
+
+              <div className="typography-controls">
+                <label>
+                  <span>Font family</span>
+                  <select
+                    value={customStyle.fontFamily}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('fontFamily', e.target.value)}
+                  >
+                    {fontOptions.map(font => (
+                      <option key={font.value} value={font.value}>
+                        {font.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  <span>Text size</span>
+                  <select
+                    value={customStyle.fontSize}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('fontSize', e.target.value)}
+                  >
+                    {['12px', '14px', '16px', '18px', '20px', '22px', '24px'].map(size => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <button
+                  className="reset-style"
+                  disabled={!customEnabled}
+                  onClick={() => setCustomStyle(styleFromTheme(theme))}
+                >
+                  <RotateCcw /> Reset colours
+                </button>
+              </div>
+
+              <div className="palette-saver">
+                <div>
+                  <b><Save /> Your saved palettes</b>
+                  <small>{savedPalettes.length} of 5 saved</small>
+                </div>
+
+                <div className="palette-save-input">
+                  <input
+                    value={paletteName}
+                    maxLength={30}
+                    placeholder="Name this palette"
+                    onChange={e => setPaletteName(e.target.value)}
+                  />
+                  <button
+                    className="green"
+                    disabled={!customEnabled || savedPalettes.length >= 5 || !paletteName.trim()}
+                    onClick={savePalette}
+                  >
+                    <Save /> Save palette
+                  </button>
+                </div>
+
+                {savedPalettes.length > 0 && (
+                  <div className="saved-palette-list">
+                    {savedPalettes.map(palette => (
+                      <div className="saved-palette" key={palette.id}>
+                        {renameId === palette.id ? (
+                          <>
+                            <input
+                              value={renameValue}
+                              maxLength={30}
+                              onChange={e => setRenameValue(e.target.value)}
+                              aria-label="New palette name"
+                            />
+                            <button onClick={finishRename}>Save name</button>
+                            <button onClick={() => setRenameId('')}>
+                              <X />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="palette-name"
+                              onClick={() => applyPalette(palette)}
+                            >
+                              <i style={{ background: palette.style.background }} />
+                              <span>{palette.name}</span>
+                              <small>Apply</small>
+                            </button>
+
+                            <button
+                              aria-label={`Rename ${palette.name}`}
+                              title="Rename"
+                              onClick={() => startRename(palette)}
+                            >
+                              <Pencil />
+                            </button>
+
+                            <button
+                              aria-label={`Delete ${palette.name}`}
+                              title="Delete"
+                              onClick={() => deletePalette(palette.id)}
+                            >
+                              <Trash2 />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="export-settings">
+                <div>
+                  <b><FileImage /> PNG export settings</b>
+                  <small>Choose the size and background for your next PNG.</small>
+                </div>
+
+                <label>
+                  <span>Image size</span>
+                  <select
+                    value={pngScale}
+                    onChange={e => setPngScale(Number(e.target.value))}
+                  >
+                    <option value={1}>1× — Standard</option>
+                    <option value={2}>2× — High resolution</option>
+                    <option value={3}>3× — Very high resolution</option>
+                    <option value={4}>4× — Maximum resolution</option>
+                  </select>
+                </label>
+
+                <label className="transparent-option">
+                  <input
+                    type="checkbox"
+                    checked={transparentPng}
+                    onChange={e => setTransparentPng(e.target.checked)}
+                  />
+                  <span>Transparent PNG background</span>
+                </label>
+              </div>
+            </section>
+
             <div className="workbottom">
               <span>
                 <LockKeyhole /> Rendering happens locally in your browser.
@@ -614,7 +977,7 @@ function App() {
                 className={`theme-card ${id}`}
                 key={id}
                 onClick={() => {
-                  setTheme(id)
+                  chooseTheme(id)
                   document.querySelector('#studio')?.scrollIntoView({
                     behavior: 'smooth'
                   })
