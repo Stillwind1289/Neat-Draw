@@ -186,22 +186,22 @@ function cleanSvg(raw: string) {
 
 export async function renderDiagram(source: string, theme: ThemeId) {
   const job = queue.then(async () => {
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      theme: 'base',
-      themeVariables: themes[theme].variables,
-      flowchart: {
-        htmlLabels: false,
-        curve: 'basis',
-        padding: 18
-      },
-      sequence: {
-        useMaxWidth: true,
-        wrap: true
-      }
-    })
-
+    
+mermaid.initialize({
+  startOnLoad: false,
+  securityLevel: 'strict',
+  theme: 'base',
+  htmlLabels: false,
+  themeVariables: themes[theme].variables,
+  flowchart: {
+    curve: 'basis',
+    padding: 18
+  },
+  sequence: {
+    useMaxWidth: true,
+    wrap: true
+  }
+})
     const result = await mermaid.render(
       'neatdraw-' + Math.random().toString(36).slice(2),
       source
