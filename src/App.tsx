@@ -57,7 +57,6 @@ function App() {
     window.setTimeout(() => setToast(''), 2400)
   }
 
-  // Load the shared export count from Cloudflare.
   useEffect(() => {
     let cancelled = false
 
@@ -81,7 +80,7 @@ function App() {
           setTotalExports(data.totalExports)
         }
       } catch {
-        // The editor remains usable if statistics are unavailable.
+        // Statistics are optional; the editor remains usable.
       }
     }
 
@@ -92,7 +91,6 @@ function App() {
     }
   }, [])
 
-  // Record an export only after the local export has succeeded.
   const recordExport = async (format: 'svg' | 'png') => {
     try {
       const response = await fetch('/api/export', {
@@ -122,7 +120,7 @@ function App() {
         setTotalExports(data.totalExports)
       }
     } catch {
-      // A statistics error must never interrupt a successful export.
+      // A statistics error must not interrupt an export.
     }
   }
 
@@ -377,32 +375,26 @@ function App() {
         </section>
 
         <section className="milestone" aria-label="Neatdraw export milestone">
-          <div className="milestone-top">
-            <span>✳ A LITTLE NEATDRAW MILESTONE</span>
-            <span className="milestone-label">
-              <i /> SHARED TOTAL
-            </span>
+          <div className="milestone-copy">
+            <div className="eyebrow">
+              <i /> A LITTLE NEATDRAW MILESTONE
+            </div>
+
+            <h2>A few diagrams, made neater.</h2>
+
+            <p>
+              Every export adds a little something to our shared count.
+            </p>
           </div>
 
-          <div className="milestone-main">
+          <div className="milestone-count">
             <strong>
               {totalExports === null
                 ? '—'
                 : totalExports.toLocaleString()}
             </strong>
 
-            <div>
-              <b>Export actions recorded.</b>
-              <p>
-                One shared count across Neatdraw. We count export actions,
-                not people or diagrams.
-              </p>
-            </div>
-          </div>
-
-          <div className="milestone-note">
-            <Check size={14} />
-            Diagram contents are not sent with the count.
+            <span>export actions recorded</span>
           </div>
         </section>
 
