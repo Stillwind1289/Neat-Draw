@@ -3,6 +3,16 @@ import mermaid from 'mermaid'
 
 export type ThemeId = 'paper' | 'midnight' | 'citrus' | 'lavender'
 
+export interface CustomStyle {
+  background: string
+  primaryColor: string
+  primaryTextColor: string
+  primaryBorderColor: string
+  lineColor: string
+  fontFamily: string
+  fontSize: string
+}
+
 export const themes: Record<ThemeId, {
   name: string
   desc: string
@@ -79,6 +89,47 @@ export const themes: Record<ThemeId, {
   }
 }
 
+export const defaultCustomStyle: CustomStyle = {
+  background: '#fffdf8',
+  primaryColor: '#e2eee6',
+  primaryTextColor: '#244c3b',
+  primaryBorderColor: '#7ca38b',
+  lineColor: '#648b77',
+  fontFamily: 'DM Sans, sans-serif',
+  fontSize: '16px'
+}
+
+export const fontOptions = [
+  { label: 'DM Sans', value: 'DM Sans, sans-serif' },
+  { label: 'Arial', value: 'Arial, sans-serif' },
+  { label: 'Georgia', value: 'Georgia, serif' },
+  { label: 'Trebuchet MS', value: 'Trebuchet MS, sans-serif' },
+  { label: 'Courier New', value: 'Courier New, monospace' }
+]
+
+export function getThemeVariables(
+  theme: ThemeId,
+  customStyle?: CustomStyle
+): Record<string, string> {
+  const base = themes[theme].variables
+
+  if (!customStyle) {
+    return { ...base }
+  }
+
+  return {
+    ...base,
+    background: customStyle.background,
+    primaryColor: customStyle.primaryColor,
+    primaryTextColor: customStyle.primaryTextColor,
+    primaryBorderColor: customStyle.primaryBorderColor,
+    lineColor: customStyle.lineColor,
+    edgeLabelBackground: customStyle.background,
+    fontFamily: customStyle.fontFamily,
+    fontSize: customStyle.fontSize
+  }
+}
+
 export const starter = `flowchart TD
  A[Collect ideas] --> B{Worth exploring?}
  B -->|Yes| C[Make a small plan]
@@ -142,7 +193,7 @@ function cleanSvg(raw: string) {
 
   const root = doc.documentElement
 
-  // Preserve diagram labels. Mermaid is configured to use native SVG text.
+  // Preserve diagram labels. Mermaid uses native SVG text.
   root.querySelectorAll(
     'script,iframe,object,embed,audio,video'
   ).forEach(n => n.remove())
@@ -184,24 +235,28 @@ function cleanSvg(raw: string) {
   return new XMLSerializer().serializeToString(root)
 }
 
-export async function renderDiagram(source: string, theme: ThemeId) {
+export async function renderDiagram(
+  source: string,
+  theme: ThemeId,
+  customStyle?: CustomStyle
+) {
   const job = queue.then(async () => {
-    
-mermaid.initialize({
-  startOnLoad: false,
-  securityLevel: 'strict',
-  theme: 'base',
-  htmlLabels: false,
-  themeVariables: themes[theme].variables,
-  flowchart: {
-    curve: 'basis',
-    padding: 18
-  },
-  sequence: {
-    useMaxWidth: true,
-    wrap: true
-  }
-})
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: 'base',
+      htmlLabels: false,
+      themeVariables: getThemeVariables(theme, customStyle),
+      flowchart: {
+        curve: 'basis',
+        padding: 18
+      },
+      sequence: {
+        useMaxWidth: true,
+        wrap: true
+      }
+    })
+
     const result = await mermaid.render(
       'neatdraw-' + Math.random().toString(36).slice(2),
       source
