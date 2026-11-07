@@ -3,6 +3,15 @@ import mermaid from 'mermaid'
 
 export type ThemeId = 'paper' | 'midnight' | 'citrus' | 'lavender'
 
+export type CurveStyle =
+  | 'basis'
+  | 'linear'
+  | 'cardinal'
+  | 'step'
+  | 'monotoneX'
+  | 'monotoneY'
+  | 'natural'
+
 export interface CustomStyle {
   background: string
   primaryColor: string
@@ -11,6 +20,16 @@ export interface CustomStyle {
   lineColor: string
   fontFamily: string
   fontSize: string
+
+  // Additional palette colors
+  secondaryColor?: string
+  tertiaryColor?: string
+
+  // Flowchart layout controls
+  nodeSpacing?: number
+  rankSpacing?: number
+  padding?: number
+  curve?: CurveStyle
 }
 
 export const themes: Record<ThemeId, {
@@ -95,8 +114,14 @@ export const defaultCustomStyle: CustomStyle = {
   primaryTextColor: '#244c3b',
   primaryBorderColor: '#7ca38b',
   lineColor: '#648b77',
+  secondaryColor: '#f3e8d7',
+  tertiaryColor: '#f8f4eb',
   fontFamily: 'DM Sans, sans-serif',
-  fontSize: '16px'
+  fontSize: '16px',
+  nodeSpacing: 50,
+  rankSpacing: 50,
+  padding: 18,
+  curve: 'basis'
 }
 
 export const fontOptions = [
@@ -105,6 +130,14 @@ export const fontOptions = [
   { label: 'Georgia', value: 'Georgia, serif' },
   { label: 'Trebuchet MS', value: 'Trebuchet MS, sans-serif' },
   { label: 'Courier New', value: 'Courier New, monospace' }
+]
+
+export const curveOptions: { label: string; value: CurveStyle }[] = [
+  { label: 'Smooth', value: 'basis' },
+  { label: 'Straight', value: 'linear' },
+  { label: 'Rounded', value: 'cardinal' },
+  { label: 'Stepped', value: 'step' },
+  { label: 'Natural', value: 'natural' }
 ]
 
 export function getThemeVariables(
@@ -124,6 +157,10 @@ export function getThemeVariables(
     primaryTextColor: customStyle.primaryTextColor,
     primaryBorderColor: customStyle.primaryBorderColor,
     lineColor: customStyle.lineColor,
+    secondaryColor:
+      customStyle.secondaryColor ?? base.secondaryColor,
+    tertiaryColor:
+      customStyle.tertiaryColor ?? base.tertiaryColor,
     edgeLabelBackground: customStyle.background,
     fontFamily: customStyle.fontFamily,
     fontSize: customStyle.fontSize
@@ -193,7 +230,8 @@ function cleanSvg(raw: string) {
 
   const root = doc.documentElement
 
-  // Preserve diagram labels. Mermaid uses native SVG text.
+  // Preserve diagram labels and native SVG text.
+  // Do not remove foreignObject elements here.
   root.querySelectorAll(
     'script,iframe,object,embed,audio,video'
   ).forEach(n => n.remove())
@@ -245,12 +283,19 @@ export async function renderDiagram(
       startOnLoad: false,
       securityLevel: 'strict',
       theme: 'base',
+
+      // Keeps SVG labels compatible with Canva exports.
       htmlLabels: false,
+
       themeVariables: getThemeVariables(theme, customStyle),
+
       flowchart: {
-        curve: 'basis',
-        padding: 18
+        curve: customStyle?.curve ?? 'basis',
+        padding: customStyle?.padding ?? 18,
+        nodeSpacing: customStyle?.nodeSpacing ?? 50,
+        rankSpacing: customStyle?.rankSpacing ?? 50
       },
+
       sequence: {
         useMaxWidth: true,
         wrap: true
