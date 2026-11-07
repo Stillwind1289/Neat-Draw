@@ -1573,3 +1573,458 @@ em {
     grid-template-columns: 1fr;
   }
 }
+/* =====================================
+   NEATDRAW STUDIO — VISUAL REFINEMENT
+   ===================================== */
+
+.studio-controls {
+  margin: 24px 0;
+  padding: 28px;
+  background: #fffefa;
+  border: 1px solid #e9e6dc;
+  border-radius: 16px;
+  box-shadow: 0 5px 22px rgba(45, 55, 42, 0.035);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.studio-controls-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.studio-controls-heading h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 7px 0;
+  font-size: 19px;
+  font-weight: 600;
+  color: #283b30;
+}
+
+.studio-controls-heading p {
+  margin: 0;
+  color: #85877e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.studio-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  background: #f2f5ef;
+  border: 1px solid #e1e8dd;
+  border-radius: 9px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.studio-toggle input,
+.transparent-option input {
+  accent-color: #638b73;
+}
+
+/* Colour controls */
+
+.custom-style-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  padding: 20px;
+  background: #f8f7f1;
+  border-radius: 12px;
+}
+
+.color-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 7px 10px;
+  min-width: 0;
+}
+
+.color-control span {
+  color: #555d52;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.color-control input[type="color"] {
+  width: 38px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #deded3;
+  border-radius: 7px;
+  background: white;
+  cursor: pointer;
+}
+
+.color-control small {
+  grid-column: 1 / -1;
+  color: #92948b;
+  font-size: 10px;
+}
+
+/* Typography and layout settings */
+
+.typography-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 22px;
+}
+
+.typography-controls > label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+.typography-controls > label > span {
+  color: #596157;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.typography-controls select,
+.palette-save-input input,
+.saved-palette input,
+.export-settings select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #e4e2d9;
+  border-radius: 8px;
+  background: #fff;
+  color: #3e493f;
+  font: inherit;
+  font-size: 12px;
+}
+
+.typography-controls input[type="range"] {
+  width: 100%;
+  accent-color: #638b73;
+}
+
+.reset-style {
+  align-self: end;
+  justify-self: start;
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid #e4e2d9;
+  border-radius: 8px;
+  background: #fff;
+  color: #5b6d5d;
+  font-size: 12px;
+}
+
+/* Separate layout section */
+
+.layout-controls {
+  margin: 0;
+  padding: 25px 0 0;
+  border-top: 1px solid #ece9e0;
+}
+
+.layout-controls .studio-controls-heading {
+  margin-bottom: 18px;
+}
+
+.layout-note {
+  padding: 12px 15px;
+  margin: 0 0 18px;
+  border-radius: 9px;
+  background: #f2f5ef;
+  color: #687667;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Saved palettes */
+
+.palette-saver {
+  padding: 22px;
+  border: 1px solid #e9e6dc;
+  border-radius: 12px;
+  background: #faf9f4;
+}
+
+.palette-saver > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.palette-saver > div:first-child b,
+.export-settings > div:first-child b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #344538;
+  font-size: 14px;
+}
+
+.palette-saver > div:first-child small {
+  color: #8b8e84;
+  font-size: 11px;
+}
+
+.palette-save-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.palette-save-input button,
+.preset-actions button {
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid #dfe4da;
+  border-radius: 8px;
+  background: #fff;
+  color: #435847;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.palette-save-input button.green {
+  background: #426b54;
+  color: white;
+  border-color: #426b54;
+}
+
+.preset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 13px 0 16px;
+}
+
+.preset-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.preset-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.saved-palette-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saved-palette {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #eae8df;
+  border-radius: 9px;
+  background: white;
+}
+
+.saved-palette .palette-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.saved-palette .palette-name i {
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.saved-palette .palette-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #445347;
+  font-size: 12px;
+}
+
+.saved-palette .palette-name small {
+  margin-left: auto;
+  color: #64866c;
+  font-size: 11px;
+}
+
+.saved-palette > button:not(.palette-name) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 1px solid #e9e6dc;
+  border-radius: 7px;
+  background: white;
+  color: #687568;
+}
+
+.saved-palette svg,
+.preset-actions svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Export settings */
+
+.export-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid #e9e6dc;
+  border-radius: 12px;
+  background: #faf9f4;
+}
+
+.export-settings > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.export-settings > div:first-child small {
+  color: #888b81;
+  font-size: 11px;
+}
+
+.export-settings > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  color: #626b60;
+}
+
+.export-settings .transparent-option {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+}
+
+/* Disabled controls */
+
+.custom-style-grid.disabled {
+  opacity: 0.55;
+}
+
+.studio-controls button:disabled,
+.studio-controls select:disabled {
+  cursor: not-allowed;
+}
+
+/* Responsive tablet */
+
+@media (max-width: 850px) {
+  .custom-style-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workbody {
+    grid-template-columns: 1fr;
+  }
+
+  .export-settings {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Responsive phone */
+
+@media (max-width: 600px) {
+  .studio-controls {
+    padding: 17px;
+    gap: 23px;
+    border-radius: 12px;
+  }
+
+  .studio-controls-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .studio-toggle {
+    width: 100%;
+  }
+
+  .custom-style-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 14px;
+    gap: 17px 12px;
+  }
+
+  .typography-controls {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .palette-saver {
+    padding: 15px;
+  }
+
+  .palette-save-input {
+    grid-template-columns: 1fr;
+  }
+
+  .palette-save-input button {
+    width: 100%;
+  }
+
+  .preset-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .preset-actions button {
+    justify-content: center;
+    padding: 9px 6px;
+  }
+
+  .saved-palette {
+    flex-wrap: wrap;
+  }
+
+  .saved-palette .palette-name {
+    flex-basis: 100%;
+  }
+
+  .export-settings {
+    grid-template-columns: 1fr;
+    padding: 15px;
+  }
+
+  .export-settings .transparent-option {
+    grid-column: auto;
+  }
+
+  .layout-controls {
+    padding-top: 20px;
+  }
+}
