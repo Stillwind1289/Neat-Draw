@@ -2028,3 +2028,152 @@ em {
     padding-top: 20px;
   }
 }
+/* =====================================
+   NEATDRAW — SPACING AND ALIGNMENT FIX
+   ===================================== */
+
+/* Saved palettes: keep every action in its own row */
+
+.palette-saver {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+  width: 100%;
+  overflow: hidden;
+}
+
+.palette-saver > div:first-child {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+}
+
+.palette-save-input {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.palette-save-input input {
+  width: 100%;
+  min-width: 0;
+}
+
+.palette-save-input button {
+  white-space: nowrap;
+}
+
+.preset-actions {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+}
+
+.preset-actions button {
+  flex: 0 0 auto;
+  min-width: 125px;
+}
+
+.saved-palette-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.saved-palette {
+  display: flex;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+}
+
+.saved-palette .palette-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Export count */
+
+.milestone-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+}
+
+.milestone-count strong {
+  display: block;
+  line-height: 1.1;
+}
+
+.milestone-count span {
+  display: block;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Footer heart */
+
+.footer-brand small {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.footer-brand small svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  stroke-width: 1.5;
+  opacity: 0.65;
+}
+
+/* Phone layout */
+
+@media (max-width: 600px) {
+  .palette-save-input {
+    grid-template-columns: 1fr;
+  }
+
+  .palette-save-input button {
+    width: 100%;
+  }
+
+  .preset-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .preset-actions button {
+    min-width: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .saved-palette {
+    flex-wrap: nowrap !important;
+  }
+
+  .saved-palette .palette-name {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .milestone-count {
+    align-items: flex-start;
+  }
+}
