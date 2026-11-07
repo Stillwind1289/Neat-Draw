@@ -1,4 +1,3 @@
-
 import mermaid from 'mermaid'
 
 export type ThemeId = 'paper' | 'midnight' | 'citrus' | 'lavender'
@@ -12,6 +11,9 @@ export type CurveStyle =
   | 'monotoneY'
   | 'natural'
 
+export type NodeShape = 'square' | 'soft' | 'pill'
+export type CanvasAlignment = 'center' | 'left'
+
 export interface CustomStyle {
   background: string
   primaryColor: string
@@ -20,16 +22,18 @@ export interface CustomStyle {
   lineColor: string
   fontFamily: string
   fontSize: string
-
-  // Additional palette colors
   secondaryColor?: string
   tertiaryColor?: string
-
-  // Flowchart layout controls
   nodeSpacing?: number
   rankSpacing?: number
   padding?: number
   curve?: CurveStyle
+  nodeShape?: NodeShape
+  borderWidth?: number
+  fontWeight?: string
+  letterSpacing?: number
+  canvasPadding?: number
+  canvasAlignment?: CanvasAlignment
 }
 
 export const themes: Record<ThemeId, {
@@ -121,7 +125,13 @@ export const defaultCustomStyle: CustomStyle = {
   nodeSpacing: 50,
   rankSpacing: 50,
   padding: 18,
-  curve: 'basis'
+  curve: 'basis',
+  nodeShape: 'soft',
+  borderWidth: 1.5,
+  fontWeight: '600',
+  letterSpacing: 0,
+  canvasPadding: 28,
+  canvasAlignment: 'center'
 }
 
 export const fontOptions = [
@@ -138,6 +148,15 @@ export const curveOptions: { label: string; value: CurveStyle }[] = [
   { label: 'Rounded', value: 'cardinal' },
   { label: 'Stepped', value: 'step' },
   { label: 'Natural', value: 'natural' }
+]
+
+export const nodeShapeOptions: {
+  label: string
+  value: NodeShape
+}[] = [
+  { label: 'Square corners', value: 'square' },
+  { label: 'Soft corners', value: 'soft' },
+  { label: 'Pill corners', value: 'pill' }
 ]
 
 export function getThemeVariables(
@@ -157,10 +176,8 @@ export function getThemeVariables(
     primaryTextColor: customStyle.primaryTextColor,
     primaryBorderColor: customStyle.primaryBorderColor,
     lineColor: customStyle.lineColor,
-    secondaryColor:
-      customStyle.secondaryColor ?? base.secondaryColor,
-    tertiaryColor:
-      customStyle.tertiaryColor ?? base.tertiaryColor,
+    secondaryColor: customStyle.secondaryColor ?? base.secondaryColor,
+    tertiaryColor: customStyle.tertiaryColor ?? base.tertiaryColor,
     edgeLabelBackground: customStyle.background,
     fontFamily: customStyle.fontFamily,
     fontSize: customStyle.fontSize
@@ -218,7 +235,10 @@ export const examples = [
 
 let queue = Promise.resolve()
 
-function cleanSvg(raw: string) {
+function cleanSvg(
+  raw: string,
+  customStyle?: CustomStyle
+): string {
   const doc = new DOMParser().parseFromString(raw, 'image/svg+xml')
 
   if (
@@ -230,8 +250,6 @@ function cleanSvg(raw: string) {
 
   const root = doc.documentElement
 
-  // Preserve diagram labels and native SVG text.
-  // Do not remove foreignObject elements here.
   root.querySelectorAll(
     'script,iframe,object,embed,audio,video'
   ).forEach(n => n.remove())
@@ -268,7 +286,136 @@ function cleanSvg(raw: string) {
     }
   }
 
+  if (customStyle) {
+    const fills = [
+      customStyle.primaryColor,
+      customStyle.secondaryColor ?? customStyle.primaryColor,
+      customStyle.tertiaryColor ?? customStyle.primaryColor
+    ]
+
+    // Apply the three palette fills to flowchart nodes in sequence.
+    const nodes = Array.from(root.querySelectorAll('.node'))
+
+    nodes.forEach((node, index) => {
+      const fill = fills[index % fills.length]
+
+      node.querySelectorAll(
+        'rect, polygon, circle, ellipse'
+      ).forEach(shape => {
+        shape.setAttribute('fill', fill)
+        shape.setAttribute(
+          'stroke',
+          customStyle.primaryBorderColor
+        )
+
+        if (shape.tagName.toLowerCase() === 'rect') {
+          const height = Number(shape.getAttribute('height')) || 0
+          const radius =
+            customStyle.nodeShape === 'square'
+              ? 0
+              : customStyle.nodeShape === 'pill'
+                ? Math.min(height / 2, 40)
+                : 9
+
+          shape.setAttribute('rx', String(radius))
+          shape.setAttribute('ry', String(radius))
+        }
+
+        shape.setAttribute(
+          'stroke-width',
+          String(customStyle.borderWidth ?? 1.5)
+        )
+      })
+    })
+
+    root.querySelectorAll(
+      '.nodeLabel, .edgeLabel, .cluster-label, .label, text'
+    ).forEach(label => {
+      label.setAttribute(
+        'font-weight',
+        customStyle.fontWeight ?? '600'
+      )
+
+      label.setAttribute(
+        'letter-spacing',
+        `${customStyle.letterSpacing ?? 0}px`
+      )
+    })
+  }
+
   root.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+
+  return new XMLSerializer().serializeToString(root)
+}
+
+/**
+ * Adds a real background and padding to the SVG viewBox.
+ * The same prepared SVG can be used for SVG and PNG downloads.
+ */
+export function prepareSvgExport(
+  raw: string,
+  background: string,
+  padding = 28,
+  transparent = false
+): string {
+  const doc = new DOMParser().parseFromString(raw, 'image/svg+xml')
+  const root = doc.documentElement
+
+  if (
+    doc.querySelector('parsererror') ||
+    root.tagName.toLowerCase() !== 'svg'
+  ) {
+    throw Error('Could not prepare the SVG export.')
+  }
+
+  const viewBox = (root.getAttribute('viewBox') || '')
+    .trim()
+    .split(/[ ,]+/)
+    .map(Number)
+
+  let x = 0
+  let y = 0
+  let width = Number(root.getAttribute('width')) || 1000
+  let height = Number(root.getAttribute('height')) || 700
+
+  if (viewBox.length === 4 && viewBox.every(Number.isFinite)) {
+    ;[x, y, width, height] = viewBox
+  }
+
+  const safePadding = Math.max(0, Math.min(160, padding))
+  const newX = x - safePadding
+  const newY = y - safePadding
+  const newWidth = width + safePadding * 2
+  const newHeight = height + safePadding * 2
+
+  root.setAttribute(
+    'viewBox',
+    `${newX} ${newY} ${newWidth} ${newHeight}`
+  )
+  root.setAttribute('width', String(newWidth))
+  root.setAttribute('height', String(newHeight))
+  root.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+
+  const oldBackground = root.querySelector(
+    ':scope > rect[data-neatdraw-background]'
+  )
+  oldBackground?.remove()
+
+  if (!transparent) {
+    const rect = doc.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'rect'
+    )
+
+    rect.setAttribute('data-neatdraw-background', 'true')
+    rect.setAttribute('x', String(newX))
+    rect.setAttribute('y', String(newY))
+    rect.setAttribute('width', String(newWidth))
+    rect.setAttribute('height', String(newHeight))
+    rect.setAttribute('fill', background)
+
+    root.insertBefore(rect, root.firstChild)
+  }
 
   return new XMLSerializer().serializeToString(root)
 }
@@ -283,10 +430,7 @@ export async function renderDiagram(
       startOnLoad: false,
       securityLevel: 'strict',
       theme: 'base',
-
-      // Keeps SVG labels compatible with Canva exports.
       htmlLabels: false,
-
       themeVariables: getThemeVariables(theme, customStyle),
 
       flowchart: {
@@ -307,7 +451,7 @@ export async function renderDiagram(
       source
     )
 
-    return cleanSvg(result.svg)
+    return cleanSvg(result.svg, customStyle)
   })
 
   queue = job.then(
