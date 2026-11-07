@@ -27,6 +27,7 @@ import {
   validate,
   defaultCustomStyle,
   fontOptions,
+  curveOptions,
   type ThemeId,
   type CustomStyle
 } from './diagram'
@@ -41,11 +42,14 @@ function styleFromTheme(theme: ThemeId): CustomStyle {
   const v = themes[theme].variables
 
   return {
+    ...defaultCustomStyle,
     background: v.background,
     primaryColor: v.primaryColor,
     primaryTextColor: v.primaryTextColor,
     primaryBorderColor: v.primaryBorderColor,
     lineColor: v.lineColor,
+    secondaryColor: v.secondaryColor,
+    tertiaryColor: v.tertiaryColor,
     fontFamily: v.fontFamily,
     fontSize: v.fontSize
   }
@@ -355,7 +359,10 @@ function App() {
     }
   }
 
-  const updateStyle = (key: keyof CustomStyle, value: string) => {
+  const updateStyle = <K extends keyof CustomStyle>(
+    key: K,
+    value: CustomStyle[K]
+  ) => {
     setCustomStyle(current => ({
       ...current,
       [key]: value
@@ -393,7 +400,10 @@ function App() {
   }
 
   const applyPalette = (palette: SavedPalette) => {
-    setCustomStyle(palette.style)
+    setCustomStyle({
+      ...defaultCustomStyle,
+      ...palette.style
+    })
     setCustomEnabled(true)
     notify(`Applied ${palette.name}`)
   }
@@ -426,6 +436,13 @@ function App() {
     setRenameValue('')
     notify('Palette renamed')
   }
+
+  const diagramHeader = code.trim().match(
+    /^(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|journey|gantt|pie|mindmap|timeline|gitGraph|quadrantChart|xychart(?:-beta)?|sankey-beta|block-beta)\b/im
+  )
+
+  const diagramType = diagramHeader?.[1]?.toLowerCase() ?? ''
+  const isFlowchart = diagramType === 'flowchart' || diagramType === 'graph'
 
   return (
     <div className="shell" id="top">
@@ -737,7 +754,7 @@ function App() {
                 <div>
                   <div className="eyebrow">MAKE IT YOURS</div>
                   <h3><Palette /> Custom styling</h3>
-                  <p>Adjust the colours and typography of your diagram.</p>
+                  <p>Adjust the colours, typography and layout of your diagram.</p>
                 </div>
 
                 <label className="studio-toggle">
@@ -763,7 +780,7 @@ function App() {
                 </label>
 
                 <label className="color-control">
-                  <span>Node fill</span>
+                  <span>Primary node fill</span>
                   <input
                     type="color"
                     value={customStyle.primaryColor}
@@ -805,6 +822,28 @@ function App() {
                   />
                   <small>{customStyle.lineColor}</small>
                 </label>
+
+                <label className="color-control">
+                  <span>Secondary node fill</span>
+                  <input
+                    type="color"
+                    value={customStyle.secondaryColor ?? defaultCustomStyle.secondaryColor!}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('secondaryColor', e.target.value)}
+                  />
+                  <small>{customStyle.secondaryColor ?? defaultCustomStyle.secondaryColor}</small>
+                </label>
+
+                <label className="color-control">
+                  <span>Tertiary node fill</span>
+                  <input
+                    type="color"
+                    value={customStyle.tertiaryColor ?? defaultCustomStyle.tertiaryColor!}
+                    disabled={!customEnabled}
+                    onChange={e => updateStyle('tertiaryColor', e.target.value)}
+                  />
+                  <small>{customStyle.tertiaryColor ?? defaultCustomStyle.tertiaryColor}</small>
+                </label>
               </div>
 
               <div className="typography-controls">
@@ -841,8 +880,83 @@ function App() {
                   disabled={!customEnabled}
                   onClick={() => setCustomStyle(styleFromTheme(theme))}
                 >
-                  <RotateCcw /> Reset colours
+                  <RotateCcw /> Reset style
                 </button>
+              </div>
+
+              <div className="layout-controls">
+                <div className="studio-controls-heading">
+                  <div>
+                    <h3>Diagram layout</h3>
+                    <p>Control the spacing and shape of flowchart connectors.</p>
+                  </div>
+                </div>
+
+                {!isFlowchart && (
+                  <p className="layout-note">
+                    These settings apply to flowcharts. Choose the Flowchart
+                    example or enter flowchart Mermaid code to use them.
+                  </p>
+                )}
+
+                <div className="typography-controls">
+                  <label>
+                    <span>Node spacing · {customStyle.nodeSpacing ?? 50}</span>
+                    <input
+                      type="range"
+                      min="10"
+                      max="120"
+                      step="5"
+                      value={customStyle.nodeSpacing ?? 50}
+                      disabled={!customEnabled || !isFlowchart}
+                      onChange={e => updateStyle('nodeSpacing', Number(e.target.value))}
+                    />
+                  </label>
+
+                  <label>
+                    <span>Level spacing · {customStyle.rankSpacing ?? 50}</span>
+                    <input
+                      type="range"
+                      min="10"
+                      max="150"
+                      step="5"
+                      value={customStyle.rankSpacing ?? 50}
+                      disabled={!customEnabled || !isFlowchart}
+                      onChange={e => updateStyle('rankSpacing', Number(e.target.value))}
+                    />
+                  </label>
+
+                  <label>
+                    <span>Diagram padding · {customStyle.padding ?? 18}</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="60"
+                      step="2"
+                      value={customStyle.padding ?? 18}
+                      disabled={!customEnabled || !isFlowchart}
+                      onChange={e => updateStyle('padding', Number(e.target.value))}
+                    />
+                  </label>
+
+                  <label>
+                    <span>Connector style</span>
+                    <select
+                      value={customStyle.curve ?? 'basis'}
+                      disabled={!customEnabled || !isFlowchart}
+                      onChange={e => updateStyle(
+                        'curve',
+                        e.target.value as CustomStyle['curve']
+                      )}
+                    >
+                      {curveOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               </div>
 
               <div className="palette-saver">
